@@ -113,3 +113,51 @@ func (i *SpaceConfig) GetManagerGroups() []string {
 func (i *SpaceConfig) GetAuditorGroups() []string {
 	return i.Auditor.groups(i.AuditorGroup)
 }
+
+type SpaceDefaults struct {
+	Developer               UserMgmt `yaml:"space-developer"`
+	Manager                 UserMgmt `yaml:"space-manager"`
+	Auditor                 UserMgmt `yaml:"space-auditor"`
+	DeveloperGroup          string   `yaml:"space-developer-group,omitempty"`
+	ManagerGroup            string   `yaml:"space-manager-group,omitempty"`
+	AuditorGroup            string   `yaml:"space-auditor-group,omitempty"`
+	AllowSSH                bool     `yaml:"allow-ssh,omitempty"`
+	EnableSpaceQuota        bool     `yaml:"enable-space-quota,omitempty"`
+	EnableSecurityGroup     bool     `yaml:"enable-security-group,omitempty"`
+	SecurityGroupContents   string   `yaml:"security-group-contents,omitempty"`
+	RemoveUsers             bool     `yaml:"enable-remove-users,omitempty"`
+	IsoSegment              string   `yaml:"isolation_segment,omitempty"`
+	ASGs                    []string `yaml:"named-security-groups,omitempty"`
+	MemoryLimit             string   `yaml:"memory-limit,omitempty,omitempty"`
+	InstanceMemoryLimit     string   `yaml:"instance-memory-limit,omitempty"`
+	TotalRoutes             string   `yaml:"total-routes,omitempty"`
+	TotalServices           string   `yaml:"total-services,omitempty"`
+	PaidServicePlansAllowed bool     `yaml:"paid-service-plans-allowed,omitempty"`
+	TotalReservedRoutePorts string   `yaml:"total_reserved_route_ports,omitempty"`
+	TotalServiceKeys        string   `yaml:"total_service_keys,omitempty"`
+	AppInstanceLimit        string   `yaml:"app_instance_limit,omitempty"`
+	AppTaskLimit            string   `yaml:"app_task_limit,omitempty"`
+	NamedQuota              string   `yaml:"named_quota,omitempty"`
+}
+
+func (i *SpaceDefaults) GetDeveloperGroups() []string {
+	return i.Developer.groups(i.DeveloperGroup)
+}
+
+func (i *SpaceDefaults) GetManagerGroups() []string {
+	return i.Manager.groups(i.ManagerGroup)
+}
+
+func (i *SpaceDefaults) GetAuditorGroups() []string {
+	return i.Auditor.groups(i.AuditorGroup)
+}
+
+func NewSpaceDefaults() *SpaceDefaults {
+	space := SpaceDefaults{}
+	space.AppInstanceLimit = unlimited
+	space.AppTaskLimit = unlimited
+	space.TotalReservedRoutePorts = "0"
+	space.TotalServiceKeys = unlimited
+	space.InstanceMemoryLimit = unlimited
+	return &space
+}

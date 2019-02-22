@@ -93,23 +93,49 @@ func (m *yamlManager) GetGlobalConfig() (*GlobalConfig, error) {
 
 // GetOrgConfigs reads all orgs from the cf-mgmt configuration.
 func (m *yamlManager) GetOrgConfigs() ([]OrgConfig, error) {
+	orgDefaults := NewOrgDefaults()
+	LoadFile(filepath.Join(m.ConfigDir, "orgDefaults.yml"), &orgDefaults)
+
 	files, err := FindFiles(m.ConfigDir, "orgConfig.yml")
 	if err != nil {
 		return nil, err
 	}
 	result := make([]OrgConfig, len(files))
 	for i, f := range files {
-		result[i].AppTaskLimit = unlimited
-		result[i].AppInstanceLimit = unlimited
-		result[i].TotalReservedRoutePorts = "0"
-		result[i].TotalPrivateDomains = unlimited
-		result[i].TotalServiceKeys = unlimited
-		result[i].InstanceMemoryLimit = unlimited
+		result[i].BillingManagerGroup = orgDefaults.BillingManagerGroup
+		result[i].ManagerGroup = orgDefaults.ManagerGroup
+		result[i].AuditorGroup = orgDefaults.AuditorGroup
+		result[i].TotalPrivateDomains = orgDefaults.TotalPrivateDomains
+		result[i].TotalReservedRoutePorts = orgDefaults.TotalReservedRoutePorts
+		result[i].TotalServiceKeys = orgDefaults.TotalServiceKeys
+		result[i].AppInstanceLimit = orgDefaults.AppInstanceLimit
+		result[i].AppTaskLimit = orgDefaults.AppTaskLimit
+		result[i].MemoryLimit = orgDefaults.MemoryLimit
+		result[i].InstanceMemoryLimit = orgDefaults.InstanceMemoryLimit
+		result[i].TotalRoutes = orgDefaults.TotalRoutes
+		result[i].TotalServices = orgDefaults.TotalServices
+		result[i].PaidServicePlansAllowed = orgDefaults.PaidServicePlansAllowed
 
 		if err = LoadFile(f, &result[i]); err != nil {
 			lo.G.Error(err)
 			return nil, err
 		}
+
+		result[i].BillingManager.LDAPUsers = append(result[i].BillingManager.LDAPUsers, orgDefaults.BillingManager.LDAPUsers...)
+		result[i].BillingManager.Users = append(result[i].BillingManager.Users, orgDefaults.BillingManager.Users...)
+		result[i].BillingManager.SamlUsers = append(result[i].BillingManager.SamlUsers, orgDefaults.BillingManager.SamlUsers...)
+
+		result[i].Auditor.LDAPUsers = append(result[i].Auditor.LDAPUsers, orgDefaults.Auditor.LDAPUsers...)
+		result[i].Auditor.Users = append(result[i].Auditor.Users, orgDefaults.Auditor.Users...)
+		result[i].Auditor.SamlUsers = append(result[i].Auditor.SamlUsers, orgDefaults.Auditor.SamlUsers...)
+
+		result[i].Manager.LDAPUsers = append(result[i].Manager.LDAPUsers, orgDefaults.Manager.LDAPUsers...)
+		result[i].Manager.Users = append(result[i].Manager.Users, orgDefaults.Manager.Users...)
+		result[i].Manager.SamlUsers = append(result[i].Manager.SamlUsers, orgDefaults.Manager.SamlUsers...)
+
+		result[i].BillingManager.LDAPGroups = append(result[i].GetBillingManagerGroups(), orgDefaults.GetBillingManagerGroups()...)
+		result[i].Auditor.LDAPGroups = append(result[i].GetAuditorGroups(), orgDefaults.GetAuditorGroups()...)
+		result[i].Manager.LDAPGroups = append(result[i].GetManagerGroups(), orgDefaults.GetManagerGroups()...)
 	}
 	return result, nil
 }
@@ -149,8 +175,7 @@ func (m *yamlManager) OrgSpaces(orgName string) (*Spaces, error) {
 }
 
 func (m *yamlManager) GetSpaceConfigs() ([]SpaceConfig, error) {
-
-	spaceDefaults := SpaceConfig{}
+	spaceDefaults := NewSpaceDefaults()
 	LoadFile(filepath.Join(m.ConfigDir, "spaceDefaults.yml"), &spaceDefaults)
 
 	files, err := FindFiles(m.ConfigDir, "spaceConfig.yml")
@@ -159,11 +184,26 @@ func (m *yamlManager) GetSpaceConfigs() ([]SpaceConfig, error) {
 	}
 	result := make([]SpaceConfig, len(files))
 	for i, f := range files {
-		result[i].AppInstanceLimit = unlimited
-		result[i].AppTaskLimit = unlimited
-		result[i].TotalReservedRoutePorts = "0"
-		result[i].TotalServiceKeys = unlimited
-		result[i].InstanceMemoryLimit = unlimited
+		result[i].DeveloperGroup = spaceDefaults.DeveloperGroup
+		result[i].ManagerGroup = spaceDefaults.ManagerGroup
+		result[i].AuditorGroup = spaceDefaults.AuditorGroup
+		result[i].AllowSSH = spaceDefaults.AllowSSH
+		result[i].EnableSpaceQuota = spaceDefaults.EnableSpaceQuota
+		result[i].EnableSecurityGroup = spaceDefaults.EnableSecurityGroup
+		result[i].SecurityGroupContents = spaceDefaults.SecurityGroupContents
+		result[i].RemoveUsers = spaceDefaults.RemoveUsers
+		result[i].IsoSegment = spaceDefaults.IsoSegment
+		result[i].ASGs = spaceDefaults.ASGs
+		result[i].MemoryLimit = spaceDefaults.MemoryLimit
+		result[i].InstanceMemoryLimit = spaceDefaults.InstanceMemoryLimit
+		result[i].TotalRoutes = spaceDefaults.TotalRoutes
+		result[i].TotalServices = spaceDefaults.TotalServices
+		result[i].PaidServicePlansAllowed = spaceDefaults.PaidServicePlansAllowed
+		result[i].TotalReservedRoutePorts = spaceDefaults.TotalReservedRoutePorts
+		result[i].TotalServiceKeys = spaceDefaults.TotalServiceKeys
+		result[i].AppInstanceLimit = spaceDefaults.AppInstanceLimit
+		result[i].AppTaskLimit = spaceDefaults.AppTaskLimit
+		result[i].NamedQuota = spaceDefaults.NamedQuota
 
 		if err = LoadFile(f, &result[i]); err != nil {
 			return nil, err
@@ -462,11 +502,10 @@ func (m *yamlManager) CreateConfigIfNotExists(uaaOrigin string) error {
 	}); err != nil {
 		return err
 	}
-	if err := WriteFile(fmt.Sprintf("%s/spaceDefaults.yml", m.ConfigDir), struct {
-		Developer UserMgmt `yaml:"space-developer"`
-		Manager   UserMgmt `yaml:"space-manager"`
-		Auditor   UserMgmt `yaml:"space-auditor"`
-	}{}); err != nil {
+	if err := WriteFile(fmt.Sprintf("%s/orgDefaults.yml", m.ConfigDir), &OrgDefaults{}); err != nil {
+		return err
+	}
+	if err := WriteFile(fmt.Sprintf("%s/spaceDefaults.yml", m.ConfigDir), &SpaceDefaults{}); err != nil {
 		return err
 	}
 	return nil

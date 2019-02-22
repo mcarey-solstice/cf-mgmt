@@ -1,0 +1,19 @@
+org: org-1
+org-billingmanager:
+  ldap_users: [org-1-ldap-user]
+  users: [org-1-user@test.com]
+  ldap_group: "org-1-ldap-group"
+org-manager:
+  ldap_users: [org-1-ldap-user]
+  users: [org-1-user@test.com]
+  ldap_group: "org-1-ldap-group"
+org-auditor:
+  ldap_users: [org-1-ldap-user]
+  users: [org-1-user@test.com]
+  ldap_group: "org-1-ldap-group"
+enable-org-quota: false
+memory-limit: 10240
+total-routes: 10
+total-services: -1
+paid-service-plans-allowed: true
+enable-remove-users: true

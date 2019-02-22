@@ -124,3 +124,46 @@ func (o *OrgConfig) GetManagerGroups() []string {
 func (o *OrgConfig) GetAuditorGroups() []string {
 	return o.Auditor.groups(o.AuditorGroup)
 }
+
+type OrgDefaults struct {
+	BillingManager          UserMgmt `yaml:"org-billingmanager"`
+	Manager                 UserMgmt `yaml:"org-manager"`
+	Auditor                 UserMgmt `yaml:"org-auditor"`
+	BillingManagerGroup     string   `yaml:"org-billingmanager-group,omitempty"`
+	ManagerGroup            string   `yaml:"org-manager-group,omitempty"`
+	AuditorGroup            string   `yaml:"org-auditor-group,omitempty"`
+	TotalPrivateDomains     string   `yaml:"total_private_domains,omitempty"`
+	TotalReservedRoutePorts string   `yaml:"total_reserved_route_ports,omitempty"`
+	TotalServiceKeys        string   `yaml:"total_service_keys,omitempty"`
+	AppInstanceLimit        string   `yaml:"app_instance_limit,omitempty"`
+	AppTaskLimit            string   `yaml:"app_task_limit,omitempty"`
+	MemoryLimit             string   `yaml:"memory-limit,omitempty"`
+	InstanceMemoryLimit     string   `yaml:"instance-memory-limit,omitempty"`
+	TotalRoutes             string   `yaml:"total-routes,omitempty"`
+	TotalServices           string   `yaml:"total-services,omitempty"`
+	PaidServicePlansAllowed bool     `yaml:"paid-service-plans-allowed,omitempty"`
+}
+
+func (o *OrgDefaults) GetBillingManagerGroups() []string {
+	return o.BillingManager.groups(o.BillingManagerGroup)
+}
+
+func (o *OrgDefaults) GetManagerGroups() []string {
+	return o.Manager.groups(o.ManagerGroup)
+}
+
+func (o *OrgDefaults) GetAuditorGroups() []string {
+	return o.Auditor.groups(o.AuditorGroup)
+}
+
+func NewOrgDefaults() *OrgDefaults {
+	org := OrgDefaults{}
+	org.AppTaskLimit = unlimited
+	org.AppInstanceLimit = unlimited
+	org.TotalReservedRoutePorts = "0"
+	org.TotalPrivateDomains = unlimited
+	org.TotalServiceKeys = unlimited
+	org.InstanceMemoryLimit = unlimited
+
+	return &org
+}

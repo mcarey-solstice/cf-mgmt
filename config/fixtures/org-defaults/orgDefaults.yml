@@ -1,0 +1,13 @@
+org-billingmanager:
+  ldap_users: [default-ldap-user]
+  users: [default-user@test.com]
+  ldap_group: "default-ldap-group"
+org-manager:
+  ldap_users: [default-ldap-user]
+  users: [default-user@test.com]
+  ldap_group: "default-ldap-group"
+org-auditor:
+  ldap_users: [default-ldap-user]
+  users: [default-user@test.com]
+  ldap_group: "default-ldap-group"
+instance-memory-limit: 4096

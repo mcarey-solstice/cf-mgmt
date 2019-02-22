@@ -36,6 +36,8 @@ var _ = Describe("cf-mgmt cli", func() {
 			Expect(err).ShouldNot(HaveOccurred())
 			_, err = os.Stat("./config/spaceDefaults.yml")
 			Expect(err).ShouldNot(HaveOccurred())
+			_, err = os.Stat("./config/orgDefaults.yml")
+			Expect(err).ShouldNot(HaveOccurred())
 
 			addOrgToConfigCommand := exec.Command(outPath, "add-org-to-config", "--org", "test-org")
 			session, err = Start(addOrgToConfigCommand, GinkgoWriter, GinkgoWriter)

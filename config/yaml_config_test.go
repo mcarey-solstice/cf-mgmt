@@ -419,6 +419,54 @@ var _ = Describe("CF-Mgmt Config", func() {
 				})
 			})
 
+			Context("GetOrgDefaults", func() {
+				It("Should load default configs", func() {
+					m := config.NewManager("./fixtures/org-defaults")
+					cfgs, err := m.GetOrgConfigs()
+					Ω(err).ShouldNot(HaveOccurred())
+					Ω(cfgs).Should(HaveLen(2))
+
+					cfg := cfgs[0]
+					Ω(cfg.Org).Should(BeEquivalentTo("org-1"))
+					Ω(cfg.BillingManager.LDAPUsers).Should(ConsistOf("default-ldap-user", "org-1-ldap-user"))
+					Ω(cfg.BillingManager.Users).Should(ConsistOf("default-user@test.com", "org-1-user@test.com"))
+					Ω(cfg.BillingManager.LDAPGroup).Should(BeEquivalentTo("org-1-ldap-group"))
+
+					Ω(cfg.Auditor.LDAPUsers).Should(ConsistOf("default-ldap-user", "org-1-ldap-user"))
+					Ω(cfg.Auditor.Users).Should(ConsistOf("default-user@test.com", "org-1-user@test.com"))
+					Ω(cfg.Auditor.LDAPGroup).Should(BeEquivalentTo("org-1-ldap-group"))
+
+					Ω(cfg.Manager.LDAPUsers).Should(ConsistOf("default-ldap-user", "org-1-ldap-user"))
+					Ω(cfg.Manager.Users).Should(ConsistOf("default-user@test.com", "org-1-user@test.com"))
+					Ω(cfg.Manager.LDAPGroup).Should(BeEquivalentTo("org-1-ldap-group"))
+
+					Ω(cfg.InstanceMemoryLimit).Should(BeEquivalentTo("4096"))
+				})
+
+				It("Should allow individual orgConfigs to override", func () {
+					m := config.NewManager("./fixtures/org-defaults")
+					cfgs, err := m.GetOrgConfigs()
+					Ω(err).ShouldNot(HaveOccurred())
+					Ω(cfgs).Should(HaveLen(2))
+
+					cfg := cfgs[1]
+					Ω(cfg.Org).Should(BeEquivalentTo("org-2"))
+					Ω(cfg.BillingManager.LDAPUsers).Should(ConsistOf("default-ldap-user", "org-1-ldap-user"))
+					Ω(cfg.BillingManager.Users).Should(ConsistOf("default-user@test.com", "org-1-user@test.com"))
+					Ω(cfg.BillingManager.LDAPGroup).Should(BeEquivalentTo("org-1-ldap-group"))
+
+					Ω(cfg.Auditor.LDAPUsers).Should(ConsistOf("default-ldap-user", "org-1-ldap-user"))
+					Ω(cfg.Auditor.Users).Should(ConsistOf("default-user@test.com", "org-1-user@test.com"))
+					Ω(cfg.Auditor.LDAPGroup).Should(BeEquivalentTo("org-1-ldap-group"))
+
+					Ω(cfg.Manager.LDAPUsers).Should(ConsistOf("default-ldap-user", "org-1-ldap-user"))
+					Ω(cfg.Manager.Users).Should(ConsistOf("default-user@test.com", "org-1-user@test.com"))
+					Ω(cfg.Manager.LDAPGroup).Should(BeEquivalentTo("org-1-ldap-group"))
+
+					Ω(cfg.InstanceMemoryLimit).Should(BeEquivalentTo("2048"))
+				})
+			})
+
 		})
 	})
 })
